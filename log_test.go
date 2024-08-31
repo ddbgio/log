@@ -15,8 +15,8 @@ func TestNew(t *testing.T) {
 	log, err := New(opts)
 	require.NoError(t, err)
 	require.NotNil(t, log)
-	log.Debug("debug message", "key", "value")
-	log.Info("info message", "key", "value")
-	log.Warn("warn message", "key", "value")
-	log.Error("error message", "key", "value")
+	log.Debug("debug message test", "key", "value")
+	log.Info("info message test", "key", "value")
+	log.Warn("warn message test", "key", "value")
+	log.Error("error message test", "key", "value")
 }
