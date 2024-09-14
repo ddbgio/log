@@ -1,4 +1,4 @@
-module github.com/ddbgio/log
+module github.com/grackleclub/log
 
 go 1.23.0
 
