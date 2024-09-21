@@ -28,7 +28,7 @@ var (
 	errTuiFail       = errors.New("tui print failed")
 	errInvalidFields = errors.New("expected even number of key-value pairs")
 	formatTime       = "15:04:05"
-	kvIndent         = 12
+	kvIndent         = 4
 )
 
 // NewTUI returns a new TUI printer
@@ -54,9 +54,24 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 		return
 	}
 	fmt.Println(message)
+	longestKey := 0
+	for _, header := range headers {
+		if len(header) > longestKey {
+			longestKey = len(header)
+		}
+	}
+	longestValue := 0
+	for _, value := range values {
+		if len(value) > longestValue {
+			longestValue = len(value)
+		}
+	}
+
 	for i, header := range headers {
-		fmt.Printf("%*s%12s = %-40s\n",
-			kvIndent, "", header, values[i],
+		fmt.Printf("%*s| %*s | %-*s |\n",
+			kvIndent, "",
+			longestKey, header,
+			longestValue, values[i],
 		)
 	}
 
