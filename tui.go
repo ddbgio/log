@@ -28,7 +28,7 @@ var (
 	errTuiFail       = errors.New("tui print failed")
 	errInvalidFields = errors.New("expected even number of key-value pairs")
 	formatTime       = "15:04:05"
-	kvIndent         = 4
+	kvIndent         = 12
 )
 
 // NewTUI returns a new TUI printer
