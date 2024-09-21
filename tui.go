@@ -53,7 +53,10 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 		fmt.Println(err)
 		return
 	}
+	// print the message
 	fmt.Println(message)
+
+	// print the key-value pairs
 	longestKey := 0
 	for _, header := range headers {
 		if len(header) > longestKey {
@@ -68,7 +71,7 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 	}
 
 	for i, header := range headers {
-		fmt.Printf("%*s| %*s | %-*s |\n",
+		fmt.Printf("%*s| %-*s | %-*s |\n",
 			kvIndent, "",
 			longestKey, header,
 			longestValue, values[i],
