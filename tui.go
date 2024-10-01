@@ -58,6 +58,7 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 	fmt.Println(message)
 
 	// print the key-value pairs
+	width, _ := termInfo()
 	longestKey := 0
 	for _, header := range headers {
 		if len(header) > longestKey {
@@ -65,20 +66,45 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 		}
 	}
 	longestValue := 0
+	longestValueThatFits := 0
 	for _, value := range values {
-		if len(value) > longestValue {
+		trimmedValue := strings.TrimSpace(value)
+		if len(trimmedValue) > longestValue {
 			longestValue = len(value)
+			if kvIndent+longestKey+len(trimmedValue) <= width {
+				longestValueThatFits = len(trimmedValue)
+			}
 		}
 	}
 
+	// handle long values
 	for i, header := range headers {
-		fmt.Printf("%*s| %-*s | %-*s |\n",
+		key := strings.TrimSpace(header)
+		trimmedValue := strings.TrimSpace(values[i])
+
+		// fits
+		if kvIndent+longestKey+len(trimmedValue) <= width {
+			fmt.Printf("%*s| %-*s | %-*s |\n",
+				kvIndent, "",
+				longestKey, key,
+				longestValueThatFits, trimmedValue,
+			)
+			return
+		}
+		// doesn't fit, print value on next line
+		fmt.Printf("%*s| %-*s |\n%s\n",
 			kvIndent, "",
-			longestKey, strings.TrimSpace(header),
-			longestValue, strings.TrimSpace(values[i]),
+			longestKey, key,
+			trimmedValue,
 		)
 	}
+}
 
+func truncate(s string, n int) string {
+	if len(s) > n {
+		return s[:n]
+	}
+	return s
 }
 
 func (t *TUI) Debug(msg string, fields ...interface{}) {
@@ -125,7 +151,7 @@ func kvParse(fields ...interface{}) ([]string, []string, error) {
 	return headers, values, nil
 }
 
-// termInfo returns the terminal width and height
+// termInfo returns the terminal width and height, or 0, 0 if it fails
 func termInfo() (int, int) {
 	width, height, err := terminal.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
