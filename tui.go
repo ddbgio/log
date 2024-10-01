@@ -74,7 +74,9 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 	longestValueThatFits := 0
 	for _, value := range values {
 		trimmedValue := strings.TrimSpace(value)
-		if kvIndent+longestKey+len(trimmedValue) <= width {
+		expectedLength := kvIndent + longestKey + len(trimmedValue)
+		// new longest value that fits
+		if expectedLength <= width && len(trimmedValue) > longestValueThatFits {
 			longestValueThatFits = len(trimmedValue)
 		}
 	}
