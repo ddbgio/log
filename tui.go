@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
 	"errors"
@@ -73,8 +74,8 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 	for i, header := range headers {
 		fmt.Printf("%*s| %-*s | %-*s |\n",
 			kvIndent, "",
-			longestKey, header,
-			longestValue, values[i],
+			longestKey, strings.TrimSpace(header),
+			longestValue, strings.TrimSpace(values[i]),
 		)
 	}
 
