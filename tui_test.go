@@ -2,8 +2,10 @@ package log
 
 import (
 	"log/slog"
+	"os"
 	"testing"
 
+	"github.com/mattn/go-isatty"
 	"github.com/stretchr/testify/require"
 )
 
@@ -37,7 +39,15 @@ func TestHeaders(t *testing.T) {
 }
 
 func TestTermInfo(t *testing.T) {
-	w, h := termInfo()
-	require.Greater(t, w, 0)
-	require.Greater(t, h, 0)
+	t.Run("terminal size", func(t *testing.T) {
+		term := os.Stderr
+		if isatty.IsTerminal(term.Fd()) {
+			w, h := termInfo()
+			require.Greater(t, w, 0)
+			require.Greater(t, h, 0)
+			t.Logf("terminal size\nw: %d\nh: %d", w, h)
+		} else {
+			t.Logf("skipping test, not a terminal")
+		}
+	})
 }
