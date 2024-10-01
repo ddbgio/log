@@ -22,7 +22,9 @@ func TestTUI(t *testing.T) {
 		tui.Error("error message test", "key", "value", "key2", "value2")
 	})
 	t.Run("overflow", func(t *testing.T) {
-		tui.Info("test overflow message", "key", `
+		tui.Info("test overflow message",
+			"fooKey", "fooValue",
+			"keyForLongValue", `
 I'd just like to interject for a moment. What you're refering to as Linux, is in fact, GNU/Linux, 
 or as I've recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, 
 but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, 
@@ -39,7 +41,9 @@ the other programs that you run. The kernel is an essential part of an operating
 it can only function in the context of a complete operating system. Linux is normally used in combination with 
 the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. 
 All the so-called Linux distributions are really distributions of GNU/Linux!
-`)
+`,
+			"barKey", "barValue",
+		)
 	})
 }
 func TestHeaders(t *testing.T) {

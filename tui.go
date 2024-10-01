@@ -91,14 +91,14 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 				longestKey, key,
 				longestValueThatFits, trimmedValue,
 			)
-			return
+		} else {
+			// doesn't fit, print value on next line
+			fmt.Printf("%*s| %-*s |\n%s\n",
+				kvIndent, "",
+				longestKey, key,
+				trimmedValue,
+			)
 		}
-		// doesn't fit, print value on next line
-		fmt.Printf("%*s| %-*s |\n%s\n",
-			kvIndent, "",
-			longestKey, key,
-			trimmedValue,
-		)
 	}
 }
 
