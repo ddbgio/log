@@ -9,7 +9,7 @@ import (
 
 	"errors"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 type TUI struct {
@@ -30,6 +30,7 @@ var (
 	errInvalidFields = errors.New("expected even number of key-value pairs")
 	formatTime       = "15:04:05"
 	kvIndent         = 12
+	defaultWidth     = 80 // default width if no terminal determined
 )
 
 // NewTUI returns a new TUI printer
@@ -59,21 +60,22 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 
 	// print the key-value pairs
 	width, _ := termInfo()
+	if width == 0 {
+		// for CI tests without a terminal, assume default
+		width = defaultWidth
+	}
+
 	longestKey := 0
 	for _, header := range headers {
 		if len(header) > longestKey {
 			longestKey = len(header)
 		}
 	}
-	longestValue := 0
 	longestValueThatFits := 0
 	for _, value := range values {
 		trimmedValue := strings.TrimSpace(value)
-		if len(trimmedValue) > longestValue {
-			longestValue = len(value)
-			if kvIndent+longestKey+len(trimmedValue) <= width {
-				longestValueThatFits = len(trimmedValue)
-			}
+		if kvIndent+longestKey+len(trimmedValue) <= width {
+			longestValueThatFits = len(trimmedValue)
 		}
 	}
 
@@ -82,7 +84,7 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 		key := strings.TrimSpace(header)
 		trimmedValue := strings.TrimSpace(values[i])
 
-		// fits
+		// fits, print normally
 		if kvIndent+longestKey+len(trimmedValue) <= width {
 			fmt.Printf("%*s| %-*s | %-*s |\n",
 				kvIndent, "",
@@ -98,13 +100,6 @@ func printTUI(msg string, icon string, fields ...interface{}) {
 			trimmedValue,
 		)
 	}
-}
-
-func truncate(s string, n int) string {
-	if len(s) > n {
-		return s[:n]
-	}
-	return s
 }
 
 func (t *TUI) Debug(msg string, fields ...interface{}) {
@@ -153,7 +148,7 @@ func kvParse(fields ...interface{}) ([]string, []string, error) {
 
 // termInfo returns the terminal width and height, or 0, 0 if it fails
 func termInfo() (int, int) {
-	width, height, err := terminal.GetSize(int(os.Stdout.Fd()))
+	width, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		return 0, 0
 	}
