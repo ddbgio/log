@@ -46,15 +46,22 @@ var (
 func frame(ctx context.Context, wg *sync.WaitGroup, message string, s spinner) {
 	defer wg.Done()
 	for {
-		select {
-		case <-ctx.Done():
-			fmt.Printf("\r%s %s done!\n", iconInfo, message)
-			return
-		default:
-			for _, frame := range s.frames {
+		for _, frame := range s.frames {
+			select {
+			case <-ctx.Done():
+				fmt.Printf("\r%s %s done!\n", iconInfo, message)
+				return
+			default:
 				fmt.Printf("\r%s %s ...", frame, message)
 				time.Sleep(s.speed)
 			}
 		}
 	}
+}
+
+func wait(ctx context.Context, message string, s spinner) *sync.WaitGroup {
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go frame(ctx, &wg, message, s)
+	return &wg
 }
