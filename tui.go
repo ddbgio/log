@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -155,4 +156,69 @@ func termInfo() (int, int) {
 		return 0, 0
 	}
 	return width, height
+}
+
+var padding = 1
+
+// TableHeader prints the table header
+// TODO - experimental - full of bugs :)
+func (r *TUI) Table(msg string, objects []interface{}) {
+	w, _ := termInfo()
+	if w == 0 {
+		w = defaultWidth
+	}
+
+	var rowWidths []int
+	var keys []string
+	var rows [][]any
+	var rowTemplate string
+
+	for i, object := range objects {
+		var values []any
+		t := reflect.TypeOf(object)
+		v := reflect.ValueOf(object)
+
+		// Ensure the input is a struct
+		if t.Kind() != reflect.Struct {
+			fmt.Println("error: input is not a struct")
+			return
+		}
+		for j := 0; j < t.NumField(); j++ {
+			field := t.Field(j)
+			// only capture keys (headers) once
+			if i == 0 {
+				keys = append(keys, field.Name)
+				rowTemplate += "%-*s "
+				rowWidths = append(rowWidths, len(field.Name)+padding)
+			}
+			value := v.Field(j)
+			if len(fmt.Sprint(value))+padding > rowWidths[j] {
+				rowWidths[j] = len(fmt.Sprint(value)) + padding
+			}
+			values = append(values, value.Interface())
+		}
+		rows = append(rows, values)
+	}
+
+	// print results
+	var header []any
+	for i, key := range keys {
+		header = append(header, rowWidths[i])
+		header = append(header, key)
+	}
+	keyValHeader := fmt.Sprintf(rowTemplate, header...)
+	fmt.Println(keyValHeader)
+
+	fmt.Println(strings.Repeat("-", w))
+
+	for _, row := range rows {
+		var rowValues []any
+		for i, value := range row {
+			rowValues = append(rowValues, rowWidths[i])
+			rowValues = append(rowValues, fmt.Sprint(value))
+		}
+
+		rowStr := fmt.Sprintf(rowTemplate, rowValues...)
+		fmt.Println(rowStr)
+	}
 }

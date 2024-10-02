@@ -76,3 +76,31 @@ func TestTermInfo(t *testing.T) {
 		}
 	})
 }
+
+func TestTable(t *testing.T) {
+	tui, err := NewTUI(slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, tui)
+
+	type test struct {
+		Foo  string
+		Bar  int
+		Bats []string
+		Qux  bool
+	}
+	var tests = []test{
+		{"fooval", 1, []string{"bat1", "bat2"}, true},
+		{"barval", 2, []string{"bat3", "bat4"}, false},
+		{"bazval", 3, []string{"bat5", "bat6", "bat7"}, true},
+	}
+	// Convert []test to []any
+	var anyTests = make([]any, len(tests))
+	for i, v := range tests {
+		anyTests[i] = v
+	}
+	t.Run("print table", func(t *testing.T) {
+		tui.Table("example table", anyTests)
+	})
+}
