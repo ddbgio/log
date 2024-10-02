@@ -2,7 +2,7 @@ package log
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -21,13 +21,37 @@ func TestFrame(t *testing.T) {
 	wg.Wait()
 }
 
-func TestWait(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+func TestWaitSpinner(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		wg, cancel := WaitSpinner(context.Background(), "waiting on foo", runner)
+		defer wg.Wait()
+		time.Sleep(1 * time.Second)
+		cancel(nil)
+	})
+	t.Run("failure", func(t *testing.T) {
+		wg, cancel := WaitSpinner(context.Background(), "waiting on foo", runner)
+		defer wg.Wait()
+		time.Sleep(1 * time.Second)
+		cancel(errors.New("tired of waiting"))
+	})
+}
 
-	wg := wait(ctx, "waiting on foo", runner)
+func TestShowExample(t *testing.T) {
+	ctx := context.Background()
+	wg, cancel := WaitSpinner(ctx, "reticulating splines", runner)
 	defer wg.Wait()
+	time.Sleep(2 * time.Second)
+	cancel(nil)
 
-	fmt.Println("waiting on foo")
+	wg, cancel = WaitSpinner(ctx, "fleebing florbs", runner)
+	defer wg.Wait()
+	time.Sleep(2 * time.Second)
+	cancel(nil)
+
+	wg, cancel = WaitSpinner(ctx, "dismantling capitalism", runner)
+	defer wg.Wait()
+	time.Sleep(4 * time.Second)
+	cancel(errors.New("too entrenched, build communicty and try again"))
+
 	time.Sleep(2 * time.Second)
 }
